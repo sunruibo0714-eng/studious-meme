@@ -12,131 +12,173 @@
             min-height: 100vh;
             margin: 0;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
         }
         .container {
-            text-align: center;
             background: rgba(255, 255, 255, 0.1);
             padding: 40px 30px;
             border-radius: 15px;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
-            transition: all 0.5s ease;
         }
+        .text-center { text-align: center; }
         h1 { font-size: 2.5rem; margin-bottom: 10px; }
         p { font-size: 1.2rem; opacity: 0.9; }
-        
-        /* 按钮样式 */
         .btn {
-            background: white;
-            color: #5563c1;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 25px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.2s, background 0.2s;
-            margin-top: 20px;
+            background: white; color: #5563c1; border: none; padding: 12px 24px;
+            font-size: 1rem; font-weight: bold; border-radius: 25px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: all 0.2s; margin-top: 20px;
         }
         .btn:hover { background: #f0f2f5; transform: scale(1.05); }
         
-        /* 日志区域样式 - 默认隐藏 */
-        #diary-zone { display: none; text-align: left; }
-        .diary-item {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-        .diary-date { font-size: 0.9rem; opacity: 0.7; margin-bottom: 5px; }
+        /* 区域切换 */
+        #diary-zone, #edit-zone { display: none; }
         
-        /* 密码管理区域 */
-        .admin-section {
-            margin-top: 30px;
-            border-top: 1px solid rgba(255,255,255,0.2);
-            padding-top: 20px;
+        /* 日志样式 */
+        .diary-list { max-height: 300px; overflow-y: auto; margin-top: 20px; text-align: left; }
+        
+        /* 编辑器样式 */
+        textarea {
+            width: 100%; height: 200px; background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3); border-radius: 10px;
+            color: white; padding: 15px; font-size: 1rem; box-sizing: border-box; resize: none;
         }
-        .pwd-input {
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            outline: none;
-            width: 60%;
-            margin-right: 10px;
+        input {
+            width: 100%; padding: 10px; border-radius: 5px; border: none;
+            margin-bottom: 15px; box-sizing: border-box;
         }
     </style>
 </head>
 <body>
 
-    <div class="container" id="main-card">
-        <div id="home-zone">
+    <div class="container">
+        <div id="home-zone" class="text-center">
             <h1>孙睿博的个人网页</h1>
             <p>于二零二六年六月十五日创建</p>
             <p>网页创建合作伙伴 gemini</p>
-            <button class="btn" onclick="showDiary()">进入个人日志 📖</button>
+            <button class="btn" onclick="switchZone('diary-zone')">进入个人日志 📖</button>
         </div>
 
         <div id="diary-zone">
-            <h2 style="text-align: center; margin-top: 0;">公开日志</h2>
-            
-            <div class="diary-item">
-                <div class="diary-date">2026年6月15日</div>
-                <div>今天和 Gemini 一起完成了网页的升级！成功解锁了隐藏的日志入口功能，成就感满满。</div>
+            <h2 class="text-center">公开日志</h2>
+            <div class="diary-list" id="diary-container">
+                <p class="text-center">正在加载最新日志...</p>
             </div>
-            
-            <div class="diary-item">
-                <div class="diary-date">2026年6月14日</div>
-                <div>开始研究 GitHub Pages 的玩法，感觉打开了新世界的大门。</div>
+            <div class="text-center" style="margin-top: 30px;">
+                <button class="btn" onclick="switchZone('edit-zone')" style="background: #ffeb3b; color: #333;">在线修改日志 ✏️</button>
+                <button class="btn" onclick="switchZone('home-zone')" style="background: transparent; color: white; border: 1px solid white; margin-left: 10px;">返回主页</button>
             </div>
-            <div class="admin-section">
-                <p style="font-size: 0.9rem; text-align: center;">管理员编辑通道：</p>
-                <div style="text-align: center;">
-                    <input type="password" id="pwd" class="pwd-input" placeholder="输入密码进入后台编辑...">
-                    <button class="btn" style="padding: 10px 15px; margin: 0;" onclick="checkPassword()">验证</button>
-                </div>
-            </div>
-            
-            <div style="text-align: center;">
-                <button class="btn" style="background: transparent; color: white; border: 1px solid white; margin-top: 25px;" onclick="showHome()">返回主页</button>
+        </div>
+
+        <div id="edit-zone">
+            <h2>后台文章编辑器</h2>
+            <p style="font-size: 0.9rem; opacity: 0.8;">输入你的 GitHub Token，直接修改下方网页源码：</p>
+            <input type="password" id="gh-token" placeholder="粘贴你的 GitHub Personal Access Token (ghp_...)">
+            <textarea id="code-editor" placeholder="正在读取当前网页源码..."></textarea>
+            <div class="text-center">
+                <button class="btn" id="save-btn" onclick="saveToGithub()" style="background: #4caf50; color: white;">保存并发布上线 🚀</button>
+                <button class="btn" onclick="switchZone('diary-zone')" style="background: transparent; color: white; border: 1px solid white; margin-left: 10px;">取消</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 配置信息（⚠️请务必修改这里！）
-        const CONFIG = {
-            password: "271828", // 例如 "mysecret123"
-            githubEditUrl: "https://github.com/sunruibo0714-eng/studious-meme/edit/main/index.html" 
-            // 提示：在线编辑网址通常长这样：https://github.com/你的用户名/你的仓库名/edit/main/index.html
+        // 🛠️ 【唯一需要配置的地方】
+        const GITHUB_CONFIG = {
+            owner: "你的GitHub用户名",     // 比如 "sunruibo"
+            repo: "你的仓库名",           // 比如 "my-website"
+            path: "index.html"           // 保持不变
         };
 
-        // 切换到日志页面
-        function showDiary() {
+        let currentFileSha = ""; // 内部使用的文件锁标志
+
+        // 页面切换挡板
+        function switchZone(zoneId) {
             document.getElementById('home-zone').style.display = 'none';
-            document.getElementById('diary-zone').style.display = 'block';
-        }
-
-        // 返回主页
-        function showHome() {
             document.getElementById('diary-zone').style.display = 'none';
-            document.getElementById('home-zone').style.display = 'block';
+            document.getElementById('edit-zone').style.display = 'none';
+            document.getElementById(zoneId).style.display = 'block';
+            
+            if(zoneId === 'edit-zone') {
+                fetchCurrentCode();
+            }
         }
 
-        // 密码验证并跳转
-        function checkPassword() {
-            const inputPwd = document.getElementById('pwd').value;
-            if (inputPwd === CONFIG.password) {
-                alert('密码正确！正在为您打开云端日志编辑页面...');
-                window.location.href = CONFIG.githubEditUrl; // 跳转到 GitHub 让你随时随地改代码
-            } else {
-                alert('密码错误，拒绝访问！❌');
-            }
+        // 自动从 GitHub 读取最新代码放入编辑器
+        function fetchCurrentCode() {
+            const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    currentFileSha = data.sha; // 记录版本号
+                    // 解码 Base64 文本
+                    const decodedCode = decodeURIComponent(atob(data.content).split('').map(function(c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
+                    document.getElementById('code-editor').value = decodedCode;
+                });
+        }
+
+        // 页面加载时，自动把当前页面写死在 HTML 里的日志提取出来显示
+        window.onload = function() {
+            const rawHtml = document.documentElement.outerHTML;
+            // 简单用正则抓取 diary-list 里面的静态内容渲染出来
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(rawHtml, 'text/html');
+            const logs = doc.querySelector('.diary-list').innerHTML;
+            document.getElementById('diary-container').innerHTML = logs.trim() ? logs : "<p class='text-center'>暂无日志内容</p>";
+        }
+
+        // 核心：带着 Token 把新代码发射回 GitHub 仓库
+        function saveToGithub() {
+            const token = document.getElementById('gh-token').value.trim();
+            const newCode = document.getElementById('code-editor').value;
+            const saveBtn = document.getElementById('save-btn');
+
+            if(!token) { return alert('请输入你的 GitHub Token！否则无法证明你是网站主人。'); }
+            
+            saveBtn.innerText = "正在同步至云端服务器...";
+            saveBtn.disabled = true;
+
+            const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+            
+            // 将新代码转为 utf-8 的 Base64 编码
+            const b64Content = btoa(encodeURIComponent(newCode).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                return String.fromCharCode('0x' + p1);
+            }));
+
+            const bodyData = {
+                message: "来自网页前端的自动日志更新",
+                content: b64Content,
+                sha: currentFileSha
+            };
+
+            fetch(url, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `token ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(bodyData)
+            })
+            .then(res => {
+                if(res.status === 200 || res.status === 201) {
+                    alert('发布成功！GitHub 正在重新部署，预计 1 分钟后全网生效。');
+                    window.location.reload();
+                } else {
+                    alert('保存失败，可能是 Token 错误或已过期！');
+                    saveBtn.innerText = "保存并发布上线 🚀";
+                    saveBtn.disabled = false;
+                }
+            })
+            .catch(err => {
+                alert('网络请求失败：' + err);
+                saveBtn.innerText = "保存并发布上线 🚀";
+                saveBtn.disabled = false;
+            });
         }
     </script>
 </body>
