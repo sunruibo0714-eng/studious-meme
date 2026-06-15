@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head>
+<html lang="zh-CN">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>孙睿博的个人网页</title>
@@ -46,7 +47,7 @@
         
         /* 编辑器样式 */
         textarea {
-            width: 100%; height: 120px; background: rgba(255,255,255,0.2);
+            width: 100%; height: 100px; background: rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.3); border-radius: 10px;
             color: white; padding: 15px; font-size: 1rem; box-sizing: border-box; resize: none; margin-bottom: 15px;
         }
@@ -55,28 +56,40 @@
             margin-bottom: 15px; box-sizing: border-box; background: white; color: #333;
         }
         input[type="password"] { background: rgba(255,255,255,0.9); }
+
+        /* 后台删除管理列表 */
+        .admin-diary-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 8px; margin-top: 10px;
+        }
+        .delete-btn {
+            background: #ff4d4d; color: white; border: none; padding: 5px 12px;
+            border-radius: 15px; cursor: pointer; font-size: 0.85rem;
+        }
+        .delete-btn:hover { background: #ff3333; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div id="home-zone" class="text-center" style="display: none;">
+        <div id="home-zone" class="text-center">
             <h1>孙睿博的个人网页</h1>
             <p>于二零二六年六月十五日创建</p>
             <p>网页创建合作伙伴 gemini</p>
             <button class="btn" onclick="switchZone('diary-zone')">进入个人日志 📖</button>
         </div>
 
-        <div id="diary-zone" style="display: none;">
+        <div id="diary-zone">
             <h2 class="text-center">公开日志</h2>
-            <div class="diary-list" id="diary-container"><p class="text-center">暂无日志内容</p></div>
+            <div class="diary-list" id="diary-container">
+                </div>
             <div class="text-center" style="margin-top: 30px;">
-                <button class="btn" onclick="switchZone('edit-zone')" style="background: #ffeb3b; color: #333;">写新日志 ✏️</button>
+                <button class="btn" onclick="switchZone('edit-zone')" style="background: #ffeb3b; color: #333;">管理/写新日志 ✏️</button>
                 <button class="btn" onclick="switchZone('home-zone')" style="background: transparent; color: white; border: 1px solid white; margin-left: 10px;">返回主页</button>
             </div>
         </div>
 
-        <div id="edit-zone" style="display: block;">
+        <div id="edit-zone">
             <h2>发布新日志</h2>
             
             <label>超级密码 (GitHub Token):</label>
@@ -89,19 +102,25 @@
             <textarea id="diary-content-input" placeholder="今天发生了什么好玩的事..."></textarea>
             
             <div class="text-center">
-                <button class="btn" id="save-btn" onclick="addNewDiarySubmit()" style="background: #4caf50; color: white;" disabled="">正在疯狂打包并同步云端...</button>
-                <button class="btn" onclick="switchZone('diary-zone')" style="background: transparent; color: white; border: 1px solid white; margin-left: 10px;">取消</button>
+                <button class="btn" id="save-btn" onclick="addNewDiarySubmit()" style="background: #4caf50; color: white; margin-top:0;">直接一键发布 🚀</button>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.2); margin: 25px 0;">
+
+            <h2>删除过往日志</h2>
+            <div id="admin-diary-list" style="max-height: 200px; overflow-y: auto;">
+                </div>
+
+            <div class="text-center" style="margin-top: 20px;">
+                <button class="btn" onclick="switchZone('diary-zone')" style="background: transparent; color: white; border: 1px solid white;">返回日志页</button>
             </div>
         </div>
     </div>
 
     <script id="diary-database" type="application/json">
-[
-        {
-                "date": "2026年6月15日",
-                "content": "正在带薪开发日志中。。。\n不知道后面会不会把token给背下来"
-        }
-]
+    [
+        
+    ]
     </script>
 
     <script>
@@ -125,111 +144,126 @@
                 renderDiaries();
             }
             if(zoneId === 'edit-zone') {
-                // 自动帮你在输入框里填上今天的日期
                 const today = new Date();
                 document.getElementById('diary-date-input').value = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
-                // 偷偷去获取一次当前最新的代码加密锁 SHA
+                renderAdminDiaries();
                 fetchCurrentSha();
             }
         }
 
-        // 渲染日志列表
+        // 获取当前数据列表
+        function getDiariesFromDb() {
+            return JSON.parse(document.getElementById('diary-database').textContent);
+        }
+
+        // 渲染公开日志列表
         function renderDiaries() {
-            const dbText = document.getElementById('diary-database').textContent;
-            const diaries = JSON.parse(dbText);
+            const diaries = getDiariesFromDb();
             const container = document.getElementById('diary-container');
-            
-            if(diaries.length === 0) {
-                container.innerHTML = "<p class='text-center'>暂无日志内容</p>";
-                return;
-            }
+            if(diaries.length === 0) { container.innerHTML = "<p class='text-center'>暂无日志内容</p>"; return; }
             
             let html = "";
             diaries.forEach(item => {
-                html += `
-                    <div class="diary-item">
-                        <div class="diary-date">${item.date}</div>
-                        <div>${item.content}</div>
-                    </div>
-                `;
+                html += `<div class="diary-item"><div class="diary-date">${item.date}</div><div>${item.content}</div></div>`;
             });
             container.innerHTML = html;
         }
 
-        // 初始化加载
-        window.onload = function() {
-            renderDiaries();
+        // 渲染后台带删除按钮的列表
+        function renderAdminDiaries() {
+            const diaries = getDiariesFromDb();
+            const adminContainer = document.getElementById('admin-diary-list');
+            if(diaries.length === 0) { adminContainer.innerHTML = "<p style='font-size:0.9rem;opacity:0.6;'>暂无可以删除的日志</p>"; return; }
+
+            let html = "";
+            diaries.forEach((item, index) => {
+                // 限制一下显示字数防止排版乱
+                const shortContent = item.content.length > 15 ? item.content.substring(0, 15) + '...' : item.content;
+                html += `
+                    <div class="admin-diary-item">
+                        <span style="font-size:0.9rem;">[${item.date}] ${shortContent}</span>
+                        <button class="delete-btn" onclick="deleteDiaryItem(${index})">删除</button>
+                    </div>
+                `;
+            });
+            adminContainer.innerHTML = html;
         }
 
-        // 获取最新的仓库 SHA 锁
+        window.onload = function() { renderDiaries(); }
+
         function fetchCurrentSha() {
             const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
             fetch(url).then(res => res.json()).then(data => { currentFileSha = data.sha; });
         }
 
-        // 核心功能：点击发布后的全自动化处理
+        // 核心功能：添加新日志提交
         function addNewDiarySubmit() {
             const token = document.getElementById('gh-token').value.trim();
             const inputDate = document.getElementById('diary-date-input').value.trim();
             const inputContent = document.getElementById('diary-content-input').value.trim();
-            const saveBtn = document.getElementById('save-btn');
-
             if(!token) return alert('请输入你的 GitHub Token！');
             if(!inputDate || !inputContent) return alert('日期和内容都不能为空！');
 
-            saveBtn.innerText = "正在疯狂打包并同步云端...";
+            const diaries = getDiariesFromDb();
+            diaries.unshift({ date: inputDate, content: inputContent }); // 塞到最前面
+            
+            pushToGithub(token, diaries, `📝 新增日志: ${inputDate}`);
+        }
+
+        // 核心功能：点击删除某一项目
+        function deleteDiaryItem(index) {
+            const token = document.getElementById('gh-token').value.trim();
+            if(!token) return alert('删除日志需要极高的权限，请输入你的 GitHub Token 验证身份！');
+            
+            const diaries = getDiariesFromDb();
+            const targetDate = diaries[index].date;
+            
+            if(confirm(`确定要永远删除 [${targetDate}] 这篇日志吗？`)) {
+                diaries.splice(index, 1); // 从数组里剔除这一项
+                pushToGithub(token, diaries, `🗑️ 删除了日志: ${targetDate}`);
+            }
+        }
+
+        // 把最终修改好的数据打包发射去服务器
+        function pushToGithub(token, newDiariesArray, commitMessage) {
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.innerText = "云端同步中...";
             saveBtn.disabled = true;
 
-            // 1. 获取现在的全套网页源码
             const rawHtml = document.documentElement.outerHTML;
-            
-            // 2. 解析出当前的 JSON 数据，并把新日志塞到最前面
-            const dbText = document.getElementById('diary-database').textContent;
-            const diaries = JSON.parse(dbText);
-            diaries.unshift({ date: inputDate, content: inputContent }); // 塞入新数据
-            const newJsonString = JSON.stringify(diaries, null, 8); // 格式化
-
-            // 3. 用高超的字符串替换魔法，把 HTML 源码里的旧抽屉换成新抽屉
+            const newJsonString = JSON.stringify(newDiariesArray, null, 8);
             const regex = /(<script id="diary-database" type="application\/json">)[\s\S]*?(<\/script>)/;
             let updatedHtml = "<!DOCTYPE html>\n" + rawHtml.replace(regex, `$1\n${newJsonString}\n    $2`);
 
-            // 4. 发射回 GitHub
             const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
             const b64Content = btoa(encodeURIComponent(updatedHtml).replace(/%([0-9A-F]{2})/g, function(match, p1) {
                 return String.fromCharCode('0x' + p1);
             }));
 
-            const bodyData = {
-                message: `📝 新增日志: ${inputDate}`,
-                content: b64Content,
-                sha: currentFileSha
-            };
+            const bodyData = { message: commitMessage, content: b64Content, sha: currentFileSha };
 
             fetch(url, {
                 method: "PUT",
-                headers: {
-                    "Authorization": `token ${token}`,
-                    "Content-Type": "application/json"
-                },
+                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
                 body: JSON.stringify(bodyData)
             })
             .then(res => {
                 if(res.status === 200 || res.status === 201) {
-                    alert('🎉 完美发布！GitHub 正在全线同步，1分钟后请强制刷新网页查看！');
+                    alert('🎉 变动成功！GitHub 正在全线同步，1分钟后请强制刷新网页查看！');
                     window.location.reload();
                 } else {
-                    alert('同步失败，请检查 Token 权限或配置是否正确！');
+                    alert('变动失败，请确保你的 Token 正确且具备修改权限！');
                     saveBtn.innerText = "直接一键发布 🚀";
                     saveBtn.disabled = false;
                 }
             })
             .catch(err => {
-                alert('网络开小差了：' + err);
+                alert('网络连接错误：' + err);
                 saveBtn.innerText = "直接一键发布 🚀";
                 saveBtn.disabled = false;
             });
         }
     </script>
-
-
+</body>
+</html>
 </body></html>
