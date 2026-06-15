@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
+<html lang="zh-CN"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>孙睿博的个人网页</title>
@@ -61,24 +60,23 @@
 <body>
 
     <div class="container">
-        <div id="home-zone" class="text-center">
+        <div id="home-zone" class="text-center" style="display: none;">
             <h1>孙睿博的个人网页</h1>
             <p>于二零二六年六月十五日创建</p>
             <p>网页创建合作伙伴 gemini</p>
             <button class="btn" onclick="switchZone('diary-zone')">进入个人日志 📖</button>
         </div>
 
-        <div id="diary-zone">
+        <div id="diary-zone" style="display: none;">
             <h2 class="text-center">公开日志</h2>
-            <div class="diary-list" id="diary-container">
-                </div>
+            <div class="diary-list" id="diary-container"><p class="text-center">暂无日志内容</p></div>
             <div class="text-center" style="margin-top: 30px;">
                 <button class="btn" onclick="switchZone('edit-zone')" style="background: #ffeb3b; color: #333;">写新日志 ✏️</button>
                 <button class="btn" onclick="switchZone('home-zone')" style="background: transparent; color: white; border: 1px solid white; margin-left: 10px;">返回主页</button>
             </div>
         </div>
 
-        <div id="edit-zone">
+        <div id="edit-zone" style="display: block;">
             <h2>发布新日志</h2>
             
             <label>超级密码 (GitHub Token):</label>
@@ -91,16 +89,19 @@
             <textarea id="diary-content-input" placeholder="今天发生了什么好玩的事..."></textarea>
             
             <div class="text-center">
-                <button class="btn" id="save-btn" onclick="addNewDiarySubmit()" style="background: #4caf50; color: white;">直接一键发布 🚀</button>
+                <button class="btn" id="save-btn" onclick="addNewDiarySubmit()" style="background: #4caf50; color: white;" disabled="">正在疯狂打包并同步云端...</button>
                 <button class="btn" onclick="switchZone('diary-zone')" style="background: transparent; color: white; border: 1px solid white; margin-left: 10px;">取消</button>
             </div>
         </div>
     </div>
 
     <script id="diary-database" type="application/json">
-    [
-        
-    ]
+[
+        {
+                "date": "2026年6月15日",
+                "content": "正在带薪开发日志中。。。\n不知道后面会不会把token给背下来"
+        }
+]
     </script>
 
     <script>
@@ -229,5 +230,6 @@
             });
         }
     </script>
-</body>
-</html>
+
+
+</body></html>
