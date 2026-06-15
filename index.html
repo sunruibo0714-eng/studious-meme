@@ -9,7 +9,7 @@
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #74abe2, #5563c1);
             color: white;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -19,20 +19,125 @@
         .container {
             text-align: center;
             background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
+            padding: 40px 30px;
             border-radius: 15px;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            transition: all 0.5s ease;
         }
         h1 { font-size: 2.5rem; margin-bottom: 10px; }
         p { font-size: 1.2rem; opacity: 0.9; }
+        
+        /* 按钮样式 */
+        .btn {
+            background: white;
+            color: #5563c1;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background 0.2s;
+            margin-top: 20px;
+        }
+        .btn:hover { background: #f0f2f5; transform: scale(1.05); }
+        
+        /* 日志区域样式 - 默认隐藏 */
+        #diary-zone { display: none; text-align: left; }
+        .diary-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .diary-date { font-size: 0.9rem; opacity: 0.7; margin-bottom: 5px; }
+        
+        /* 密码管理区域 */
+        .admin-section {
+            margin-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 20px;
+        }
+        .pwd-input {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            width: 60%;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>孙睿博的个人网页</h1>
-        <p>于二零二六年六月十五日创建</p>
-        <p>网页创建合作伙伴gemini</p>
+
+    <div class="container" id="main-card">
+        <div id="home-zone">
+            <h1>孙睿博的个人网页</h1>
+            <p>于二零二六年六月十五日创建</p>
+            <p>网页创建合作伙伴 gemini</p>
+            <button class="btn" onclick="showDiary()">进入个人日志 📖</button>
+        </div>
+
+        <div id="diary-zone">
+            <h2 style="text-align: center; margin-top: 0;">公开日志</h2>
+            
+            <div class="diary-item">
+                <div class="diary-date">2026年6月15日</div>
+                <div>今天和 Gemini 一起完成了网页的升级！成功解锁了隐藏的日志入口功能，成就感满满。</div>
+            </div>
+            
+            <div class="diary-item">
+                <div class="diary-date">2026年6月14日</div>
+                <div>开始研究 GitHub Pages 的玩法，感觉打开了新世界的大门。</div>
+            </div>
+            <div class="admin-section">
+                <p style="font-size: 0.9rem; text-align: center;">管理员编辑通道：</p>
+                <div style="text-align: center;">
+                    <input type="password" id="pwd" class="pwd-input" placeholder="输入密码进入后台编辑...">
+                    <button class="btn" style="padding: 10px 15px; margin: 0;" onclick="checkPassword()">验证</button>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <button class="btn" style="background: transparent; color: white; border: 1px solid white; margin-top: 25px;" onclick="showHome()">返回主页</button>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // 配置信息（⚠️请务必修改这里！）
+        const CONFIG = {
+            password: "271828", // 例如 "mysecret123"
+            githubEditUrl: "https://github.com/sunruibo0714-eng/studious-meme/edit/main/index.html" 
+            // 提示：在线编辑网址通常长这样：https://github.com/你的用户名/你的仓库名/edit/main/index.html
+        };
+
+        // 切换到日志页面
+        function showDiary() {
+            document.getElementById('home-zone').style.display = 'none';
+            document.getElementById('diary-zone').style.display = 'block';
+        }
+
+        // 返回主页
+        function showHome() {
+            document.getElementById('diary-zone').style.display = 'none';
+            document.getElementById('home-zone').style.display = 'block';
+        }
+
+        // 密码验证并跳转
+        function checkPassword() {
+            const inputPwd = document.getElementById('pwd').value;
+            if (inputPwd === CONFIG.password) {
+                alert('密码正确！正在为您打开云端日志编辑页面...');
+                window.location.href = CONFIG.githubEditUrl; // 跳转到 GitHub 让你随时随地改代码
+            } else {
+                alert('密码错误，拒绝访问！❌');
+            }
+        }
+    </script>
 </body>
 </html>
